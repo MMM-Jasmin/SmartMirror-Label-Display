@@ -37,7 +37,7 @@ Module.register("SmartMirror-Label-Display", {
 	showGestures: false,
 	showObjects: false,
 	showFaces: false,
-	showPersons: true,
+	showPersons: false,
 	fps: 0.0,
 	timeSinceRefresh: 0,
 	refreshCounter: 0,
@@ -223,7 +223,7 @@ Module.register("SmartMirror-Label-Display", {
 				);
 				wrapper.appendChild(personLabel);
 				
-				if ("face" in Object.keys(this.personsDict[idkey])) {
+				if (this.personsDict[idkey].hasOwnProperty('face')) {
 					var faceLabel = this.createLabel(
 						this.config.faceColor,
 						this.personsDict[idkey]["face"]["center"],
@@ -235,7 +235,8 @@ Module.register("SmartMirror-Label-Display", {
 					);
 					wrapper.appendChild(faceLabel);
 				}
-				if ("gestures" in Object.keys(this.personsDict[idkey])) {
+				
+				if (this.personsDict[idkey].hasOwnProperty('gestures')) {
 					for (i = 0; i < this.personsDict[idkey].gestures.length; i++) {
 						var gestureLabel = this.createLabel(
 							this.config.gesturesColor,
@@ -450,7 +451,7 @@ Module.register("SmartMirror-Label-Display", {
 					this.showGestures = false;
 					this.showObjects = false;
 					this.showFaces = false;
-					this.showPersons = true;
+					this.showPersons = false;
 					return;
 			}
 		} else if (notification === "GESTURE_DET_FPS") {

@@ -23,7 +23,7 @@ Module.register("SmartMirror-Label-Display", {
 		textMargin: 3, // Margins of text to the bounding box in pixel
 		// Colors
 		textColor: "", // Color of label text; If empty defaults to color of bounding box
-		gesturesColor: "", // Color of gesture bounding boxes; If empty assigns different colors to classes (see colors.js)
+		gesturesColor: "red", // Color of gesture bounding boxes; If empty assigns different colors to classes (see colors.js)
 		objectsColor: "blue", // Color of object bounding boxes
 		facesColor: "orange", // Color of face bounding boxes
 		personsColor: "green", // Color of person bounding boxes
@@ -34,13 +34,10 @@ Module.register("SmartMirror-Label-Display", {
 	objectsList: [],
 	facesList: [],
 	personsDict: {},
-	showCamera: true,
-	showDistance: false,
 	showGestures: false,
 	showObjects: false,
 	showFaces: false,
-	showPersons: false,
-	showStyleTransfer: false,
+	showPersons: true,
 	fps: 0.0,
 	timeSinceRefresh: 0,
 	refreshCounter: 0,
@@ -98,7 +95,7 @@ Module.register("SmartMirror-Label-Display", {
 	/**
 	 * Called when all modules have started.
 	 */
-	postinit: function () {},
+	postinit: function () { },
 
 	/**
 	 * Refreshes the display.
@@ -128,16 +125,6 @@ Module.register("SmartMirror-Label-Display", {
 	 */
 	getDom: function () {
 		var wrapper = document.createElement("div");
-
-		// Load camera image if ready
-		if (this.config.displayCamera) {
-			if (this.streamReady && (this.showCamera || this.showDistance || this.showStyleTransfer)) {
-				var img = document.createElement("img");
-				img.src = "http://localhost:5005/video_feed";
-				img.style.zIndex = "0";
-				wrapper.appendChild(img);
-			}
-		}
 
 		// Draw gestures icons if available
 		if (this.config.showGesturesIcons) {
@@ -217,7 +204,7 @@ Module.register("SmartMirror-Label-Display", {
 					this.facesList[i]["w_h"],
 					this.facesList[i]["name"],
 					this.facesList[i]["TrackID"],
-					this.facesList[i]["id"],
+					this.facesList[i]["ID"],
 					this.facesList[i]["confidence"].toFixed(2)
 				);
 				wrapper.appendChild(label);
@@ -235,6 +222,7 @@ Module.register("SmartMirror-Label-Display", {
 					this.personsDict[idkey]["TrackID"]
 				);
 				wrapper.appendChild(personLabel);
+				
 				if ("face" in Object.keys(this.personsDict[idkey])) {
 					var faceLabel = this.createLabel(
 						this.config.faceColor,
@@ -242,7 +230,7 @@ Module.register("SmartMirror-Label-Display", {
 						this.personsDict[idkey]["face"]["w_h"],
 						this.personsDict[idkey]["face"]["name"],
 						this.personsDict[idkey]["face"]["TrackID"],
-						this.personsDict[idkey]["face"]["id"],
+						this.personsDict[idkey]["face"]["ID"],
 						this.personsDict[idkey]["face"]["confidence"].toFixed(2)
 					);
 					wrapper.appendChild(faceLabel);
@@ -368,10 +356,11 @@ Module.register("SmartMirror-Label-Display", {
 	notificationReceived: function (notification, payload, sender) {
 		if (notification === "ALL_MODULES_STARTED") {
 			this.postinit();
-		} else if (notification === "DETECTED_GESTURES") {
+		} else if (notification === "/gesture_det/gestures") {
 			// Format of gesture detection payload:
 			// {"DETECTED_GESTURES": [{"TrackID": int, "name": string, "w_h": (float, float), "center": (float, float)}]}
-			const gesturesList = payload["DETECTED_GESTURES"];
+			const json_obj = JSON.parse(payload);
+			const gesturesList = json_obj["DETECTED_GESTURES"];
 
 			// Fetch gestures_list from gesture recognition
 			if (gesturesList.length > 0) {
@@ -382,12 +371,13 @@ Module.register("SmartMirror-Label-Display", {
 					this.gesturesList = [];
 				}
 			}
-		} else if (notification === "OBJECT_DETECTED") {
-			Log.info("OBJECT_DETECTED");
-		} else if (notification === "DETECTED_OBJECTS") {
+		} else if (notification === "/object_det/objects") {
 			// Format of object detection payload:
 			// {"DETECTED_OBJECTS": [{"TrackID": int, "name": string, "w_h": (float, float), "center": (float, float)}]}
-			const objectsList = payload["DETECTED_OBJECTS"];
+			const json_obj = JSON.parse(payload);
+			const objectsList = json_obj["DETECTED_OBJECTS"];
+			//Log.info(payload)
+
 
 			// Fetch tracked_dets from object detection
 			if (objectsList.length > 0) {
@@ -398,10 +388,12 @@ Module.register("SmartMirror-Label-Display", {
 					this.objectsList = [];
 				}
 			}
-		} else if (notification === "DETECTED_FACES") {
+		} else if (notification === "/face_det/json_out") {
 			// Format of face detection payload:
 			// {"DETECTED_FACES": [{"TrackID": int, "name": string, "w_h": (float, float), "center": (float, float), "id": int, "confidence": float}]}
-			const facesList = payload["DETECTED_FACES"];
+			const json_obj = JSON.parse(payload);
+			const facesList = json_obj["DETECTED_FACES"];
+			//Log.info(payload)
 
 			// Fetch detection_list from face detection
 			if (facesList.length > 0) {
@@ -431,20 +423,11 @@ Module.register("SmartMirror-Label-Display", {
 					this.personsDict = {};
 				}
 			}
+			//this.printPersonsDict(this.personsDict);
 		} else if (notification === "LABEL_DISPLAY" || notification === "CENTER_DISPLAY") {
 			const setting = payload;
 			Log.info("Change setting for label display: " + setting);
 			switch (setting) {
-				case "TOGGLE":
-					this.showCamera = !this.showCamera;
-					this.showStyleTransfer = false;
-					return;
-				case "DISTANCE":
-					this.showDistance = !this.showDistance;
-					if (this.config.displayCamera) {
-						this.sendSocketNotification("SET", "DISTANCE");
-					}
-					return;
 				case "GESTURE":
 					this.showGestures = !this.showGestures;
 					return;
@@ -458,37 +441,16 @@ Module.register("SmartMirror-Label-Display", {
 					this.showPersons = !this.showPersons;
 					return;
 				case "SHOWALL":
-					this.showCamera = true;
-					this.showDistance = false;
 					this.showGestures = true;
 					this.showObjects = true;
 					this.showFaces = true;
-					this.showPersons = true;
-					this.showStyleTransfer = false;
-					if (this.config.displayCamera) {
-						this.sendSocketNotification("SET", "CAMERA");
-					}
+					this.showPersons = false;
 					return;
 				case "HIDEALL":
-					this.showCamera = false;
-					this.showDistance = false;
 					this.showGestures = false;
 					this.showObjects = false;
 					this.showFaces = false;
-					this.showPersons = false;
-					this.showStyleTransfer = false;
-					return;
-				case "STYLE_TRANSFERE":
-					this.showCamera = false;
-					this.showDistance = false;
-					this.showGestures = false;
-					this.showObjects = false;
-					this.showFaces = false;
-					this.showPersons = false;
-					this.showStyleTransfer = !this.showStyleTransfer;
-					if (this.config.displayCamera) {
-						this.sendSocketNotification("SET", "STYLE_TRANSFER");
-					}
+					this.showPersons = true;
 					return;
 			}
 		} else if (notification === "GESTURE_DET_FPS") {
@@ -532,6 +494,9 @@ Module.register("SmartMirror-Label-Display", {
 	 */
 	printPersonsDict: function (personsDict) {
 		if (personsDict != undefined) {
+			Log.info(personsDict);
+
+			/**
 			for (let idkey in personsDict) {
 				Log.info("Person " + idkey + ":");
 				if (personsDict[idkey] != undefined) {
@@ -563,7 +528,7 @@ Module.register("SmartMirror-Label-Display", {
 				}
 			}
 		} else {
-			Log.info("printPersonsDict: personsDict is undefined");
+			Log.info("printPersonsDict: personsDict is undefined");  */
 		}
 	},
 });

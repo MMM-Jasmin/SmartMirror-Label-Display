@@ -357,7 +357,7 @@ Module.register("SmartMirror-Label-Display", {
 	notificationReceived: function (notification, payload, sender) {
 		if (notification === "ALL_MODULES_STARTED") {
 			this.postinit();
-		} else if (notification === "/gesture_det/gestures") {
+		} else if (notification === "/gesture_det/gestures" || notification === "/gesture_det/gestures_with_distance" ) {
 			// Format of gesture detection payload:
 			// {"DETECTED_GESTURES": [{"TrackID": int, "name": string, "w_h": (float, float), "center": (float, float)}]}
 			const json_obj = JSON.parse(payload);
@@ -372,7 +372,7 @@ Module.register("SmartMirror-Label-Display", {
 					this.gesturesList = [];
 				}
 			}
-		} else if (notification === "/object_det/objects") {
+		} else if (notification === "/object_det/objects" || notification === "/object_det/objects_with_distance") {
 			// Format of object detection payload:
 			// {"DETECTED_OBJECTS": [{"TrackID": int, "name": string, "w_h": (float, float), "center": (float, float)}]}
 			const json_obj = JSON.parse(payload);

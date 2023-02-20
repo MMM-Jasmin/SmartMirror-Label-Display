@@ -261,11 +261,11 @@ Module.register("SmartMirror-Label-Display", {
 	 * @param dimensions Dimensions of label relative to image as [width,height] array. range: [0,1]
 	 * @param name Name of the label class as string.
 	 * @param trackid The tracking id for the recognised entity.
-	 * @param id Optional id for the recognised entity.
+	 * @param ID Optional id for the recognised entity.
 	 * @param confidence Optional confidence for the recognised entity.
 	 * @return The label as div element.
 	 */
-	createLabel: function (labelColor, center, dimensions, name = "", trackid = -1, id = -1, confidence = -1) {
+	createLabel: function (labelColor, center, dimensions, name = "", trackid = -1, ID = -1, confidence = -1) {
 		// Create bounding box for given darknet label
 		var label = document.createElement("div");
 		const w = this.config.image_width * dimensions[0];
@@ -290,13 +290,13 @@ Module.register("SmartMirror-Label-Display", {
 			labelString += "\n";
 		}
 		if (trackid >= 0) {
-			labelString += " id:" + trackid;
+			labelString += " ID:" + trackid;
 			if (!this.config.textAbove) {
 				labelString += "\n";
 			}
 		}
-		if (id >= 0) {
-			labelString += " pid:" + id;
+		if (ID >= 0) {
+			labelString += " pid:" + ID;
 			if (!this.config.textAbove) {
 				labelString += "\n";
 			}
@@ -391,7 +391,7 @@ Module.register("SmartMirror-Label-Display", {
 			}
 		} else if (notification === "/face_det/json_out") {
 			// Format of face detection payload:
-			// {"DETECTED_FACES": [{"TrackID": int, "name": string, "w_h": (float, float), "center": (float, float), "id": int, "confidence": float}]}
+			// {"DETECTED_FACES": [{"TrackID": int, "name": string, "w_h": (float, float), "center": (float, float), "ID": int, "confidence": float}]}
 			const json_obj = JSON.parse(payload);
 			const facesList = json_obj["DETECTED_FACES"];
 			//Log.info(payload)
@@ -472,8 +472,8 @@ Module.register("SmartMirror-Label-Display", {
 			Log.info("  center: " + entityList[i]["center"]);
 			Log.info("  w_h: " + entityList[i]["w_h"]);
 			Log.info("  name: " + entityList[i]["name"]);
-			if (entityList[i]["id"]) {
-				Log.info("  id: " + entityList[i]["id"]);
+			if (entityList[i]["ID"]) {
+				Log.info("  ID: " + entityList[i]["ID"]);
 			}
 			if (entityList[i]["confidence"]) {
 				Log.info("  confidence: " + entityList[i]["confidence"]);

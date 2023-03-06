@@ -163,6 +163,8 @@ Module.register("SmartMirror-Label-Display", {
 		// Draw gestures bounding boxes
 		if (this.showGestures) {
 			for (i = 0; i < this.gesturesList.length; i++) {
+				if ((this.gesturesList[i]["name"] == "face") || (this.gesturesList[i]["name"] == "person"))
+					continue
 				var labelColor = "";
 				if (this.config.gesturesColor === "") {
 					const gestureIndex = gesture_names.indexOf(this.gesturesList[i]["name"]);
@@ -175,7 +177,10 @@ Module.register("SmartMirror-Label-Display", {
 					this.gesturesList[i]["center"],
 					this.gesturesList[i]["w_h"],
 					this.gesturesList[i]["name"],
-					this.gesturesList[i]["TrackID"]
+					this.gesturesList[i]["TrackID"],
+					-1,
+					-1,
+					this.gesturesList[i]["distance"]
 				);
 				wrapper.appendChild(label);
 			}
@@ -189,8 +194,12 @@ Module.register("SmartMirror-Label-Display", {
 					this.objectsList[i]["center"],
 					this.objectsList[i]["w_h"],
 					this.objectsList[i]["name"],
-					this.objectsList[i]["TrackID"]
+					this.objectsList[i]["TrackID"],		
+					-1,
+					-1,
+					this.objectsList[i]["distance"]
 				);
+
 				wrapper.appendChild(label);
 			}
 		}
@@ -265,7 +274,7 @@ Module.register("SmartMirror-Label-Display", {
 	 * @param confidence Optional confidence for the recognised entity.
 	 * @return The label as div element.
 	 */
-	createLabel: function (labelColor, center, dimensions, name = "", trackid = -1, ID = -1, confidence = -1) {
+	createLabel: function (labelColor, center, dimensions, name = "", trackid = -1, ID = -1, confidence = -1, distance = -1) {
 		// Create bounding box for given darknet label
 		var label = document.createElement("div");
 		const w = this.config.image_width * dimensions[0];
@@ -303,6 +312,10 @@ Module.register("SmartMirror-Label-Display", {
 		}
 		if (confidence >= 0) {
 			labelString += " conf:" + confidence;
+		}
+
+		if (distance > 0) {
+			labelString += " dist:" + distance/1000 + "m";
 		}
 
 		// Place label text

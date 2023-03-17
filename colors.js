@@ -69,10 +69,10 @@ var gesture_icons = {
 	left_fist: { className: "fas fa-hand-rock fa-flip-horizontal" },
 	right_fuck: { className: "fas fa-hand-middle-finger", unicode: "\uf806" },
 	left_fuck: { className: "fas fa-hand-middle-finger fa-flip-horizontal" },
-	left_tumbs_up: { className: "fas fa-thumbs-up", unicode: "\uf164" },
-	right_tumbs_up: { className: "fas fa-thumbs-up fa-flip-horizontal" },
-	left_tumbs_down: { className: "fas fa-thumbs-down", unicode: "\uf165" },
-	right_tumbs_down: { className: "fas fa-thumbs-down fa-flip-horizontal" },
+	right_tumbs_up: { className: "fas fa-thumbs-up", unicode: "\uf164" },
+	left_tumbs_up: { className: "fas fa-thumbs-up fa-flip-horizontal" },
+	right_tumbs_down: { className: "fas fa-thumbs-down", unicode: "\uf165" },
+	left_tumbs_down: { className: "fas fa-thumbs-down fa-flip-horizontal" },
 };
 
 /**

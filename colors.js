@@ -75,6 +75,16 @@ var gesture_icons = {
 	left_tumbs_down: { className: "fas fa-thumbs-down fa-flip-horizontal" },
 };
 
+var emo_icons = {
+	Anger: { className: "fas fa-face-angry" },
+	Disgust: { className: "fas fa-face-tired"},
+	Fear: { className: "fas fa-face-flushed" },
+	Happiness: { className: "fas fa-face-smile-beam"},
+	Neutral: { className: "fas fa-face-meh"},
+	Sadness: { className: "fas fa-face-frown"}, //face-frown
+	Surprise: { className: "fas fa-face-surprise"},
+};
+
 /**
  * Returns a RGB color for a given index.
  * @param index The index to get a color for.

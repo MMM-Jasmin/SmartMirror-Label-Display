@@ -37,6 +37,7 @@ Module.register("SmartMirror-Label-Display", {
 	showGestures: false,
 	showObjects: false,
 	showFaces: false,
+	showEmoIcons: false,
 	showPersons: false,
 	fps: 0.0,
 	timeSinceRefresh: 0,
@@ -134,17 +135,23 @@ Module.register("SmartMirror-Label-Display", {
 				if (name in gesture_icons) {
 					// Log.info("ICON for " + name);
 					var label = document.createElement("div");
-					const w = this.config.image_width * this.gesturesList[i]["w_h"][0];
-					const h = this.config.image_height * this.gesturesList[i]["w_h"][1];
-					const x = this.config.image_width * this.gesturesList[i]["center"][0] - w;
+					w = this.config.image_width * this.gesturesList[i]["w_h"][0];
+					h = this.config.image_height * this.gesturesList[i]["w_h"][1];
+
+					//for the gesture icons a square is optimal 
+					if(w > h) h = w; 
+					else w = h;
+
+					const x = this.config.image_width * this.gesturesList[i]["center"][0] - w / 2;
 					const y = this.config.image_height * this.gesturesList[i]["center"][1] - h / 2;
 					label.style.position = "absolute";
 					label.style.left = x + "px";
 					label.style.top = y + "px";
-					label.style.width = w * 2 + "px";
+					label.style.width = w + "px";
 					label.style.height = h + "px";
 					label.style.margin = "auto";
-					// label.style.border = "3px solid red";
+					label.style.color = "#EEEEEE";
+					//label.style.border = "3px solid purple";
 					label.style.border = "none";
 					label.style.fontSize = h + "px";
 					label.style.textAlign = "center";
@@ -160,10 +167,53 @@ Module.register("SmartMirror-Label-Display", {
 			}
 		}
 
+		// Draw gestures icons if available
+		if (this.showEmoIcons) {
+			for (i = 0; i < this.facesList.length; i++) {
+				const name = this.facesList[i]["emotion"];
+				// Log.info("GESTURE " + name);
+				if (name in emo_icons) {
+					// Log.info("ICON for " + name);
+					var label = document.createElement("div");
+					w = this.config.image_width * this.facesList[i]["w_h"][0];
+					h = this.config.image_height * this.facesList[i]["w_h"][1];
+
+					//for the emotion icons a square is optimal 
+					if(w > h) h = w;
+					else w = h;
+
+					const x = this.config.image_width * this.facesList[i]["center"][0] - (w / 2); // - linewidth if not none
+					const y = this.config.image_height * this.facesList[i]["center"][1] - (h / 2); // - linewidth if not none
+					label.style.position = "absolute";
+					label.style.left = x + "px";
+					label.style.top = y + "px";
+					label.style.width = w + "px";
+					label.style.height = h + "px";
+					label.style.margin = "0px";
+					label.style.padding = "0px";
+					label.style.color = "#EEEEEE";
+					//label.style.border = "10px solid white";
+					label.style.border = "none";
+					label.style.fontSize = h + "px";
+					label.style.textAlign = "center";
+					label.style.lineHeight = h + "px";
+					label.style.display = "inline-block";
+					label.style.fontFamily = "Font Awesome 5 Free";
+					label.style.fontWeight = "400";
+					label.style.verticalAlign = "middle";
+					// label.style.lineHeight = label.style.height;
+					// label.style.lineWidth = label.style.width;
+					label.className = emo_icons[name].className;
+					wrapper.appendChild(label);
+				}
+			}
+		}
+
 		// Draw gestures bounding boxes
 		if (this.showGestures) {
 			for (i = 0; i < this.gesturesList.length; i++) {
-				if ((this.gesturesList[i]["name"] == "face") || (this.gesturesList[i]["name"] == "person"))
+				//if ((this.gesturesList[i]["name"] == "face") || (this.gesturesList[i]["name"] == "person"))
+				if ((this.gesturesList[i]["name"] == "person"))
 					continue
 				var labelColor = "";
 				if (this.config.gesturesColor === "") {
@@ -451,6 +501,9 @@ Module.register("SmartMirror-Label-Display", {
 				case "FACE":
 					this.showFaces = !this.showFaces;
 					return;
+				case "EMO":
+					this.showEmoIcons = !this.showEmoIcons;
+					return;
 				case "PERSON":
 					this.showPersons = !this.showPersons;
 					return;
@@ -464,6 +517,7 @@ Module.register("SmartMirror-Label-Display", {
 					this.showGestures = false;
 					this.showObjects = false;
 					this.showFaces = false;
+					this.showEmoIcons = false;
 					this.showPersons = false;
 					return;
 			}
